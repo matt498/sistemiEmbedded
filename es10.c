@@ -20,7 +20,7 @@ struct gestore_t {
 
     int coda_A, coda_B, coda_Q, coda_2;
     
-    int scelta;
+    int scelta[N];
     
 } gestore;
 
@@ -44,8 +44,10 @@ void init_gestore(struct gestore_t* g)
     g->A_occupata = false;
     g->B_occupata = false;
 
-    // scelta = 1 è A, scelta = 2 é B
-    g->scelta = 0;
+    // scelta = 1 è A, scelta = 2 é B9
+    for (int i = 0; i < N; i++) {
+        g->scelta[i] = 0;
+    }
     g->coda_A = 0;
     g->coda_B = 0;
     g->coda_Q = 0;
@@ -148,12 +150,12 @@ void RicQ(struct gestore_t* g, void* arg)
     if (!g->A_occupata) {
         printf("Il processo %d ha preso la Risorsa A\n", (int)arg);
         g->A_occupata = true;
-        g->scelta = 1;
+        g->scelta[(int)arg] = 1;
     }
     else {
         printf("Il processo %d ha preso la Risorsa B\n", (int)arg);
         g->B_occupata = true;
-        g->scelta = 2;
+        g->scelta[(int)arg] = 2;
     }
 
     pthread_mutex_unlock(&g->mutex);
@@ -166,16 +168,16 @@ void RilascioQ(struct gestore_t* g, void* arg) {
 
     pthread_mutex_lock(&g->mutex);
 
-    if (g->scelta == 1) {
+    if (g->scelta[(int)arg] == 1) {
         printf("Il processo %d ha rilasciato la Risorsa A\n", (int)arg);
         g->A_occupata = false;
     }
-    else {
+    else if(g->scelta[(int)arg] == 2){
         printf("Il processo %d ha rilasciato la Risorsa B\n", (int)arg);
         g->B_occupata = false;     
     }
     // resetto la variabile scelta
-    g->scelta = 0;
+    g->scelta[(int)arg] = 0;
 
     priorita(g);
 
@@ -307,7 +309,7 @@ int main(int argc, char** argv)
     pthread_create(&p, &a, processo_1, (void*)(int)1);
     //pthread_create(&p, &a, processo_2, (void*)(int)2);
     pthread_create(&p, &a, processo_2, (void*)(int)3);
-    //pthread_create(&p, &a, processo_3, (void*)(int)4);
+    pthread_create(&p, &a, processo_3, (void*)(int)4);
     pthread_create(&p, &a, processo_3, (void*)(int)5);
     //pthread_create(&p, &a, processo_4, (void*)(int)6);
     pthread_create(&p, &a, processo_4, (void*)(int)7);
